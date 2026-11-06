@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de Incidencias</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f5f7; --card:#fff; --ink:#1a1d23; --muted:#6b7280; --line:#e5e7eb;
+    --brand:#e8710a; --brand-d:#c25e05;
+    --alta:#dc2626; --media:#d97706; --baja:#059669;
+    --abierta:#dc2626; --proceso:#2563eb; --resuelta:#059669;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+  button,input,select,textarea{font:inherit}
+  .hidden{display:none!important}
+
+  /* Login */
+  #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:linear-gradient(135deg,#1a1d23 0%,#2d2f36 60%,#e8710a 160%)}
+  .login-box{background:var(--card);border-radius:16px;padding:36px 32px;width:100%;max-width:380px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+  .logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .logo-mark{width:38px;height:38px;border-radius:10px;background:var(--brand);display:grid;place-items:center;color:#fff;font-weight:700}
+  .login-box h1{font-size:20px;margin:0}
+  .login-box p.sub{color:var(--muted);margin:4px 0 24px;font-size:14px}
+  label{display:block;font-size:13px;font-weight:600;margin:0 0 6px}
+  input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:-1px;border-color:var(--brand)}
+  .field{margin-bottom:14px}
+  .btn{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:11px 18px;font-weight:600;cursor:pointer}
+  .btn:hover{background:var(--brand-d)}
+  .btn.full{width:100%}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{background:#f3f4f6}
+  .err{color:var(--alta);font-size:13px;min-height:18px;margin-top:10px}
+
+  /* App */
+  header{background:#1a1d23;color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:5}
+  header .logo h1{font-size:17px;margin:0}
+  header .user{display:flex;align-items:center;gap:12px;font-size:14px;color:#cbd5e1}
+  header .btn.ghost{color:#fff;border-color:#3f434c;padding:7px 14px}
+  header .btn.ghost:hover{background:#2d2f36}
+  main{max-width:1180px;margin:0 auto;padding:24px;display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start}
+  @media(max-width:900px){main{grid-template-columns:1fr;padding:16px}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px}
+  .card h2{font-size:16px;margin:0 0 16px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  textarea{min-height:110px;resize:vertical}
+  .ok{color:var(--baja);font-size:13px;min-height:18px;margin-top:10px}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+  @media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat .n{font-size:26px;font-weight:700}
+  .stat .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .stat.a .n{color:var(--abierta)} .stat.p .n{color:var(--proceso)} .stat.r .n{color:var(--resuelta)}
+
+  .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .filters input{flex:1;min-width:180px}
+  .filters select{width:auto}
+
+  .list{display:flex;flex-direction:column;gap:10px}
+  .inc{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:14px 16px}
+  .inc.alta{border-left-color:var(--alta)} .inc.media{border-left-color:var(--media)} .inc.baja{border-left-color:var(--baja)}
+  .inc-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .inc h3{font-size:15px;margin:0 0 4px}
+  .meta{font-size:12.5px;color:var(--muted);display:flex;gap:6px 14px;flex-wrap:wrap}
+  .desc{margin:10px 0 0;white-space:pre-wrap;font-size:14px;line-height:1.5}
+  .tags{display:flex;gap:6px;flex-shrink:0}
+  .tag{font-size:11.5px;font-weight:600;padding:3px 8px;border-radius:999px;white-space:nowrap}
+  .tag.alta{background:#fee2e2;color:var(--alta)} .tag.media{background:#fef3c7;color:#b45309} .tag.baja{background:#d1fae5;color:#047857}
+  .inc-actions{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  .inc-actions select{width:auto;padding:6px 10px;font-size:13px}
+  .inc-actions .del{background:none;border:0;color:var(--muted);cursor:pointer;font-size:13px;margin-left:auto}
+  .inc-actions .del:hover{color:var(--alta)}
+  .st-abierta{color:var(--abierta);font-weight:600} .st-proceso{color:var(--proceso);font-weight:600} .st-resuelta{color:var(--resuelta);font-weight:600}
+  .empty{text-align:center;color:var(--muted);padding:40px 20px;background:var(--card);border:1px dashed var(--line);border-radius:12px}
+  .note{font-size:12px;color:var(--muted);margin-top:10px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="login">
+  <form class="login-box" id="loginForm" autocomplete="off">
+    <div class="logo"><div class="logo-mark">!</div><h1>Incidencias</h1></div>
+    <p class="sub">Ingresa para reportar y revisar incidencias del trabajo.</p>
+    <div class="field">
+      <label for="u">Usuario</label>
+      <input id="u" required autofocus>
+    </div>
+    <div class="field">
+      <label for="p">Contraseña</label>
+      <input id="p" type="password" required>
+    </div>
+    <button class="btn full" type="button" id="loginBtn">Ingresar</button>
+    <div class="err" id="loginErr"></div>
+  </form>
+</section>
+
+<!-- APP -->
+<section id="app" class="hidden">
+  <header>
+    <div class="logo"><div class="logo-mark">!</div><h1>Reporte de Incidencias</h1></div>
+    <div class="user"><span id="whoami">tiger</span><button class="btn ghost" id="logout">Salir</button></div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Nueva incidencia</h2>
+      <form id="incForm">
+        <div class="field">
+          <label for="titulo">Título</label>
+          <input id="titulo" required maxlength="120" placeholder="Ej: Cese de asesor">
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="tipo">Tipo</label>
+            <select id="tipo">
+              <option>Cese</option>
+              <option>Renuncia</option>
+              <option>Falta / inasistencia</option>
+              <option>Tardanza</option>
+              <option>Permiso</option>
+              <option>Descanso médico</option>
+              <option>Vacaciones</option>
+              <option>Llamada de atención / amonestación</option>
+              <option>Cambio de horario o campaña</option>
+              <option>Planilla / pagos</option>
+              <option>Documentación</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="prioridad">Prioridad</label>
+            <select id="prioridad">
+              <option value="alta">Alta</option>
+              <option value="media" selected>Media</option>
+              <option value="baja">Baja</option>
+            </select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="colaborador">Colaborador</label>
+            <input id="colaborador" maxlength="80" placeholder="Nombre del asesor">
+          </div>
+          <div class="field">
+            <label for="fecha">Fecha del hecho</label>
+            <input id="fecha" type="date">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="reporta">Reportado por</label>
+            <input id="reporta" required maxlength="60" placeholder="Nombre">
+          </div>
+          <div class="field">
+            <label for="area">Área / campaña</label>
+            <input id="area" maxlength="60" placeholder="Ej: Ventas">
+          </div>
+        </div>
+        <div class="field">
+          <label for="descripcion">Descripción</label>
+          <textarea id="descripcion" required maxlength="2000" placeholder="Detalle: motivo, documentos, acuerdos, próximos pasos…"></textarea>
+        </div>
+        <button class="btn full" type="button" id="incBtn">Registrar incidencia</button>
+        <div class="ok" id="formMsg"></div>
+      </form>
+      <div class="note" id="storageNote"></div>
+    </div>
+
+    <div>
+      <div class="stats">
+        <div class="stat"><div class="n" id="sTotal">0</div><div class="l">Total</div></div>
+        <div class="stat a"><div class="n" id="sAbierta">0</div><div class="l">Abiertas</div></div>
+        <div class="stat p"><div class="n" id="sProceso">0</div><div class="l">En proceso</div></div>
+        <div class="stat r"><div class="n" id="sResuelta">0</div><div class="l">Resueltas</div></div>
+      </div>
+      <div class="filters">
+        <input id="q" placeholder="Buscar por colaborador, título o área…">
+        <select id="fEstado">
+          <option value="">Todos los estados</option>
+          <option value="abierta">Abiertas</option>
+          <option value="proceso">En proceso</option>
+          <option value="resuelta">Resueltas</option>
+        </select>
+        <select id="fPrioridad">
+          <option value="">Toda prioridad</option>
+          <option value="alta">Alta</option>
+          <option value="media">Media</option>
+          <option value="baja">Baja</option>
+        </select>
+      </div>
+      <div class="list" id="list"><div class="empty">Cargando…</div></div>
+    </div>
+  </main>
+</section>
+
+<script>
+// ---- Conexión con Google Apps Script ----
+function gs(fn, ...args){
+  return new Promise((res, rej) => {
+    google.script.run.withSuccessHandler(res).withFailureHandler(rej)[fn](...args);
+  });
+}
+const ss = { get(k){try{return sessionStorage.getItem(k)}catch(e){return window["_"+k]||null}}, set(k,v){try{sessionStorage.setItem(k,v)}catch(e){window["_"+k]=v}}, del(k){try{sessionStorage.removeItem(k)}catch(e){} window["_"+k]=null} };
+let logged = false;
+const token = () => ss.get("inc_tok");
+
+function showApp(){ document.getElementById("login").classList.add("hidden"); document.getElementById("app").classList.remove("hidden"); logged = true; startData(); }
+function showLogin(msg){ document.getElementById("app").classList.add("hidden"); document.getElementById("login").classList.remove("hidden"); logged = false; started = false; if (msg) document.getElementById("loginErr").textContent = msg; }
+
+async function doLogin(){
+  const err = document.getElementById("loginErr");
+  const btn = document.getElementById("loginBtn");
+  err.textContent = ""; btn.disabled = true; btn.textContent = "Verificando…";
+  try {
+    const t = await gs("login", document.getElementById("u").value, document.getElementById("p").value);
+    if (t) { ss.set("inc_tok", t); showApp(); }
+    else err.textContent = "Usuario o contraseña incorrectos.";
+  } catch(e) { err.textContent = "No se pudo conectar. Intenta de nuevo."; }
+  btn.disabled = false; btn.textContent = "Ingresar";
+}
+document.getElementById("loginBtn").addEventListener("click", doLogin);
+document.getElementById("loginForm").addEventListener("submit", e => { e.preventDefault(); doLogin(); });
+["u","p"].forEach(id => document.getElementById(id).addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); doLogin(); } }));
+function logout(msg){ ss.del("inc_tok"); document.getElementById("p").value=""; showLogin(msg); }
+document.getElementById("logout").addEventListener("click", () => logout());
+
+// ---- Datos ----
+let items = [];
+let started = false, timerId = null;
+
+function handleErr(e){
+  console.error(e);
+  if (String(e && e.message || e).includes("SESION")) { logout("Tu sesión expiró. Ingresa de nuevo."); return true; }
+  return false;
+}
+async function loadAll(){
+  try { items = await gs("listar", token()) || []; render(); document.getElementById("storageNote").textContent = "Las incidencias se guardan en la Google Sheet y se actualizan cada 30 segundos."; }
+  catch(e){ if (!handleErr(e)) document.getElementById("storageNote").textContent = "No se pudo cargar la lista. Reintentando…"; }
+}
+async function startData(){
+  if (started) return; started = true;
+  await loadAll();
+  clearInterval(timerId);
+  timerId = setInterval(() => { if (logged && !document.hidden) loadAll(); }, 30000);
+}
+async function saveItem(it){
+  try { await gs("guardar", token(), it); } catch(e){ handleErr(e); throw e; }
+  const i = items.findIndex(x=>x.id===it.id); if(i>=0) items[i]=it; else items.push(it); render();
+}
+async function removeItem(id){
+  try { await gs("eliminar", token(), id); } catch(e){ handleErr(e); throw e; }
+  items = items.filter(x=>x.id!==id); render();
+}
+
+// ---- Formulario ----
+async function doRegister(){
+  const msg = document.getElementById("formMsg");
+  const faltan = ["titulo","reporta","descripcion"].filter(id => !v(id));
+  if (faltan.length) { msg.style.color = "var(--alta)"; msg.textContent = "Completa título, reportado por y descripción."; document.getElementById(faltan[0]).focus(); return; }
+  const it = {
+    id: "inc_" + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    titulo: v("titulo"), tipo: v("tipo"), prioridad: v("prioridad"),
+    reporta: v("reporta"), area: v("area"), colaborador: v("colaborador"), fecha: v("fecha"), descripcion: v("descripcion"),
+    estado: "abierta", creado: Date.now()
+  };
+  try {
+    await saveItem(it);
+    ["titulo","descripcion","colaborador","fecha"].forEach(id => document.getElementById(id).value = "");
+    msg.style.color = ""; msg.textContent = "✓ Incidencia registrada.";
+    setTimeout(()=>msg.textContent="", 3000);
+  } catch(err) {
+    console.error(err); msg.style.color = "var(--alta)"; msg.textContent = "No se pudo guardar. Intenta de nuevo.";
+  }
+}
+document.getElementById("incBtn").addEventListener("click", doRegister);
+document.getElementById("incForm").addEventListener("submit", e => { e.preventDefault(); doRegister(); });
+function v(id){ return document.getElementById(id).value.trim(); }
+
+// ---- Render ----
+const ESTADOS = { abierta:"Abierta", proceso:"En proceso", resuelta:"Resuelta" };
+const PRIOS = { alta:"Alta", media:"Media", baja:"Baja" };
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtFecha = d => { const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${m[3]}/${m[2]}/${m[1]}` : d; };
+const fmt = t => { try { return new Date(t).toLocaleString("es-PE",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}); } catch(e){ return ""; } };
+
+["q","fEstado","fPrioridad"].forEach(id => document.getElementById(id).addEventListener("input", render));
+
+function render(){
+  const q = v("q").toLowerCase(), fe = v("fEstado"), fp = v("fPrioridad");
+  const all = items.slice().sort((a,b)=>(b.creado||0)-(a.creado||0));
+  const count = s => all.filter(x=>x.estado===s).length;
+  sTotal.textContent = all.length; sAbierta.textContent = count("abierta");
+  sProceso.textContent = count("proceso"); sResuelta.textContent = count("resuelta");
+
+  const list = all.filter(x =>
+    (!fe || x.estado===fe) && (!fp || x.prioridad===fp) &&
+    (!q || [x.titulo,x.colaborador,x.reporta,x.area,x.tipo,x.descripcion].join(" ").toLowerCase().includes(q)));
+
+  const el = document.getElementById("list");
+  if (!list.length) { el.innerHTML = `<div class="empty">${all.length ? "No hay incidencias con esos filtros." : "Aún no hay incidencias reportadas."}</div>`; return; }
+
+  el.innerHTML = list.map(x => `
+    <div class="inc ${esc(x.prioridad)}">
+      <div class="inc-top">
+        <div>
+          <h3>${esc(x.titulo)}</h3>
+          <div class="meta">
+            <span>${esc(x.tipo)}</span>
+            ${x.colaborador ? `<span>Colaborador: <b>${esc(x.colaborador)}</b></span>` : ""}
+            ${x.fecha ? `<span>Fecha: ${esc(fmtFecha(x.fecha))}</span>` : ""}
+            <span>Por: ${esc(x.reporta)}</span>
+            ${x.area ? `<span>Área: ${esc(x.area)}</span>` : ""}
+            <span>${fmt(x.creado)}</span>
+          </div>
+        </div>
+        <div class="tags"><span class="tag ${esc(x.prioridad)}">${PRIOS[x.prioridad]||esc(x.prioridad)}</span></div>
+      </div>
+      <p class="desc">${esc(x.descripcion)}</p>
+      <div class="inc-actions">
+        <span class="st-${esc(x.estado)}">● ${ESTADOS[x.estado]||esc(x.estado)}</span>
+        <select data-id="${esc(x.id)}" class="chg">
+          ${Object.entries(ESTADOS).map(([k,l])=>`<option value="${k}" ${k===x.estado?"selected":""}>${l}</option>`).join("")}
+        </select>
+        <button class="del" data-id="${esc(x.id)}" data-confirm="0">Eliminar</button>
+      </div>
+    </div>`).join("");
+
+  el.querySelectorAll(".chg").forEach(s => s.addEventListener("change", async () => {
+    const it = items.find(i=>i.id===s.dataset.id); if(!it) return;
+    try { await saveItem(Object.assign({}, it, { estado: s.value, actualizado: Date.now() })); } catch(e){ console.error(e); }
+  }));
+  el.querySelectorAll(".del").forEach(b => b.addEventListener("click", async () => {
+    if (b.dataset.confirm !== "1") { b.dataset.confirm="1"; b.textContent="¿Seguro? Clic otra vez"; setTimeout(()=>{b.dataset.confirm="0"; b.textContent="Eliminar";},3000); return; }
+    try { await removeItem(b.dataset.id); } catch(e){ console.error(e); }
+  }));
+}
+// Restaurar sesión al final, cuando todo está definido
+if (token()) showApp();
+</script>
+</body>
+</html>
